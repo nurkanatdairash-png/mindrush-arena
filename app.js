@@ -144,7 +144,7 @@ function renderTopbar() {
 
     document.getElementById('topUsername').textContent = ST.profile.username;
     document.getElementById('topRank').textContent = ST.profile.rank;
-    document.getElementById('topRank').className = `user-rank-badge rank-${ST.profile.rank.toLowerCase()}`;
+    document.getElementById('topRank').className = `user-rank-badge rank-${safeRankClass(ST.profile.rank)}`;
 
     const { current, needed } = xpInLevel(ST.profile.xp);
     document.getElementById('topXpFill').style.width = `${Math.min(100, (current / needed) * 100)}%`;
@@ -166,7 +166,7 @@ function renderProfilePage() {
 
   const rankEl = document.getElementById('profileRank');
   rankEl.textContent = p.rank;
-  rankEl.className = `profile-rank rank-${p.rank.toLowerCase()}`;
+  rankEl.className = `profile-rank rank-${safeRankClass(p.rank)}`;
 
   document.getElementById('profileStreak').textContent = `🔥 ${p.streak} day streak`;
   document.getElementById('pstatXP').textContent = p.xp.toLocaleString();
@@ -363,10 +363,10 @@ async function loadRecentScores() {
   const icons = { reaction: '⚡', memory: '🧩', logic: '🔢', strategy: '🧠' };
   container.innerHTML = data.map(s => `
     <div class="score-row">
-      <span class="score-game">${icons[s.game_type] || '🎮'} ${capitalize(s.game_type)}</span>
+      <span class="score-game">${icons[s.game_type] || '🎮'} ${esc(capitalize(s.game_type))}</span>
       <span class="score-val">${s.score.toLocaleString()}</span>
       <span class="score-xp">+${s.xp_earned} XP</span>
-      <span class="score-date">${timeAgo(s.created_at)}</span>
+      <span class="score-date">${esc(timeAgo(s.created_at))}</span>
     </div>
   `).join('');
 }
@@ -399,7 +399,7 @@ async function loadMiniLeaderboard() {
     <div class="lb-row">
       <span class="lb-rank-num ${i < 3 ? 'top-' + (i+1) : ''}">${i < 3 ? ['🥇','🥈','🥉'][i] : i + 1}</span>
       <span class="lb-username">${esc(p.username)}</span>
-      <span class="lb-rank-badge rank-${p.rank.toLowerCase()}">${p.rank}</span>
+      <span class="lb-rank-badge rank-${safeRankClass(p.rank)}">${esc(p.rank)}</span>
       <span class="lb-xp">${p.xp.toLocaleString()} XP</span>
     </div>
   `).join('');
@@ -416,7 +416,7 @@ function renderLeaderboard(container, data, filter) {
     <div class="lb-row ${ST.profile?.username === s.username ? 'lb-mine' : ''}">
       <span class="lb-rank-num ${i < 3 ? 'top-' + (i+1) : ''}">${i < 3 ? ['🥇','🥈','🥉'][i] : i + 1}</span>
       <span class="lb-username">${esc(s.username)}</span>
-      ${filter === 'all' ? `<span class="lb-game-tag">${icons[s.game_type] || ''} ${capitalize(s.game_type)}</span>` : ''}
+      ${filter === 'all' ? `<span class="lb-game-tag">${icons[s.game_type] || ''} ${esc(capitalize(s.game_type))}</span>` : ''}
       <span class="lb-score">${s.score.toLocaleString()}</span>
     </div>
   `).join('');
@@ -576,6 +576,8 @@ async function doSignup() {
 
   if (!username || !email || !pw) return showAuthErr('signupErr', 'Fill in all fields.');
   if (username.length < 2) return showAuthErr('signupErr', 'Username must be at least 2 characters.');
+  if (username.length > 20) return showAuthErr('signupErr', 'Username must be 20 characters or less.');
+  if (!/^[a-zA-Z0-9_\-.]+$/.test(username)) return showAuthErr('signupErr', 'Username may only contain letters, numbers, _ - and .');
   if (pw.length < 6) return showAuthErr('signupErr', 'Password must be at least 6 characters.');
 
   const btn = document.getElementById('signupBtn');
@@ -607,7 +609,10 @@ async function doSignup() {
     // Supabase still has email confirmation on — show instructions
     const el = document.getElementById('signupErr');
     if (el) {
-      el.innerHTML = '✉️ Check your inbox for <strong>' + esc(email) + '</strong> and click the confirmation link, then sign in.';
+      el.textContent = '';
+      const strong = document.createElement('strong');
+      strong.textContent = email;
+      el.append('✉️ Check your inbox for ', strong, ' and click the confirmation link, then sign in.');
       el.style.cssText = 'display:block;background:rgba(0,255,135,.08);border:1px solid rgba(0,255,135,.25);color:#00FF87;border-radius:8px;padding:12px;font-size:.8rem;text-align:center;line-height:1.6';
     }
     return;
@@ -667,7 +672,18 @@ function showToast(msg) {
 }
 
 function esc(str) {
-  return (str || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return (str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
+
+const VALID_RANKS = ['bronze','silver','gold','platinum','diamond','master','legend'];
+function safeRankClass(rank) {
+  const r = (rank || '').toLowerCase();
+  return VALID_RANKS.includes(r) ? r : 'bronze';
 }
 
 function capitalize(s) {
