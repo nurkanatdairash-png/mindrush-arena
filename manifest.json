@@ -1,0 +1,12 @@
+{
+  "name": "MindRush Arena",
+  "short_name": "MindRush",
+  "description": "Brain-training gaming platform — reflex, memory, logic, strategy",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0B1020",
+  "theme_color": "#5B8CFF",
+  "icons": [
+    { "src": "./icon.svg", "type": "image/svg+xml", "sizes": "any" }
+  ]
+}

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0B1020"/>
+      <stop offset="100%" style="stop-color:#131A2E"/>
+    </linearGradient>
+    <linearGradient id="bolt" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#5B8CFF"/>
+      <stop offset="100%" style="stop-color:#00FF87"/>
+    </linearGradient>
+    <linearGradient id="brain" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7B61FF"/>
+      <stop offset="100%" style="stop-color:#5B8CFF"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <!-- Brain shape -->
+  <path d="M160 200 C140 180 120 190 115 210 C108 235 125 258 148 260 C140 280 148 305 170 312 C178 340 200 352 220 345 C230 368 255 375 275 365 C295 375 320 368 330 345 C350 352 372 340 380 312 C402 305 410 280 402 260 C425 258 442 235 435 210 C430 190 410 180 390 200 C385 168 360 148 332 150 C318 130 290 122 265 130 C255 122 240 118 225 122 C200 126 178 142 170 160 C165 155 160 200 160 200Z" fill="url(#brain)" opacity="0.9"/>
+  <!-- Lightning bolt overlay -->
+  <path d="M275 168 L230 272 L262 272 L238 348 L300 232 L268 232 Z" fill="url(#bolt)" opacity="0.95"/>
+  <!-- Glow dots -->
+  <circle cx="176" cy="228" r="8" fill="#5B8CFF" opacity="0.6"/>
+  <circle cx="336" cy="228" r="8" fill="#5B8CFF" opacity="0.6"/>
+  <circle cx="198" cy="298" r="6" fill="#00FF87" opacity="0.5"/>
+  <circle cx="314" cy="298" r="6" fill="#00FF87" opacity="0.5"/>
+</svg>

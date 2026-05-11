@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MindRush Arena</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" as="script">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#5B8CFF">
+</head>
+<body>
+
+<!-- ── BACKGROUND ORBS ─────────────────────────────────── -->
+<div class="bg-orbs">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
+
+<!-- ── TOPBAR ──────────────────────────────────────────── -->
+<header class="topbar" id="topbar">
+  <div class="topbar-inner">
+    <div class="logo" onclick="showPage('home')">
+      <span class="logo-icon">⚡</span>
+      <span class="logo-text">MindRush<span class="logo-accent">Arena</span></span>
+    </div>
+    <nav class="top-nav" id="topNav">
+      <button class="nav-btn active" data-page="home" onclick="showPage('home')">Home</button>
+      <button class="nav-btn" data-page="leaderboard" onclick="showPage('leaderboard')">Leaderboard</button>
+      <button class="nav-btn auth-only" data-page="profile" onclick="showPage('profile')" style="display:none">Profile</button>
+    </nav>
+    <div class="topbar-right">
+      <div class="user-info" id="userInfo" style="display:none">
+        <div class="user-xp-bar">
+          <div class="user-xp-fill" id="topXpFill" style="width:0%"></div>
+        </div>
+        <div class="user-meta">
+          <span class="user-name" id="topUsername">—</span>
+          <span class="user-rank-badge" id="topRank">Bronze</span>
+        </div>
+        <button class="btn-ghost btn-sm" onclick="doLogout()">Logout</button>
+      </div>
+      <div class="auth-buttons" id="authButtons">
+        <button class="btn-ghost btn-sm" onclick="openAuth('login')">Sign In</button>
+        <button class="btn-primary btn-sm" onclick="openAuth('signup')">Sign Up</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ── TOAST ───────────────────────────────────────────── -->
+<div class="toast" id="toast"></div>
+
+<!-- ── ACHIEVEMENT POPUP ───────────────────────────────── -->
+<div class="achievement-popup" id="achievePopup" style="display:none">
+  <div class="achieve-icon" id="achieveIcon">🏆</div>
+  <div class="achieve-text">
+    <div class="achieve-title">Achievement Unlocked!</div>
+    <div class="achieve-name" id="achieveName"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE: HOME
+══════════════════════════════════════════════════════ -->
+<main class="page active" id="page-home">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">🧠 Brain-Training Gaming Platform</div>
+      <h1 class="hero-title">Train Your Mind.<br><span class="text-gradient">Dominate the Arena.</span></h1>
+      <p class="hero-sub">Compete in reflex, memory, logic and strategy mini-games. Earn XP, climb ranks, unlock achievements.</p>
+      <div class="hero-actions">
+        <button class="btn-primary btn-lg" onclick="scrollToGames()">Play Now</button>
+        <button class="btn-ghost btn-lg" onclick="showPage('leaderboard')">View Leaderboard</button>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><span class="hs-num" id="heroPlayers">—</span><span class="hs-label">Players</span></div>
+        <div class="hero-stat"><span class="hs-num" id="heroGames">—</span><span class="hs-label">Games Played</span></div>
+        <div class="hero-stat"><span class="hs-num" id="heroTop">—</span><span class="hs-label">Top Score</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Daily Reward (only when logged in) -->
+  <div class="daily-reward-card" id="dailyRewardCard" style="display:none">
+    <div class="dr-icon">🎁</div>
+    <div class="dr-text">
+      <div class="dr-title">Daily Reward Available!</div>
+      <div class="dr-sub">Come back every day to keep your streak</div>
+    </div>
+    <button class="btn-primary" id="dailyBtn" onclick="claimDaily()">Claim XP</button>
+  </div>
+
+  <!-- Games Section -->
+  <section class="section" id="gamesSection">
+    <div class="section-header">
+      <h2 class="section-title">Choose Your Game</h2>
+      <p class="section-sub">Each game tests a different cognitive skill</p>
+    </div>
+    <div class="games-grid">
+
+      <!-- Reaction Rush -->
+      <div class="game-card" data-game="reaction" onclick="startGame('reaction')">
+        <div class="game-card-glow"></div>
+        <div class="game-icon">⚡</div>
+        <div class="game-info">
+          <h3 class="game-name">Reaction Rush</h3>
+          <p class="game-desc">Test your reflexes. Hit the target the instant it appears. Every millisecond counts.</p>
+          <div class="game-meta">
+            <span class="game-skill skill-reflex">Reflex</span>
+            <span class="game-diff diff-easy">Easy to learn</span>
+          </div>
+          <div class="game-best" id="best-reaction">Best: —</div>
+        </div>
+        <button class="game-play-btn">Play</button>
+      </div>
+
+      <!-- Memory Matrix -->
+      <div class="game-card" data-game="memory" onclick="startGame('memory')">
+        <div class="game-card-glow"></div>
+        <div class="game-icon">🧩</div>
+        <div class="game-info">
+          <h3 class="game-name">Memory Matrix</h3>
+          <p class="game-desc">Memorize the flashing pattern, then recreate it from memory. Grids get bigger each round.</p>
+          <div class="game-meta">
+            <span class="game-skill skill-memory">Memory</span>
+            <span class="game-diff diff-medium">Challenging</span>
+          </div>
+          <div class="game-best" id="best-memory">Best: —</div>
+        </div>
+        <button class="game-play-btn">Play</button>
+      </div>
+
+      <!-- Logic Blitz -->
+      <div class="game-card" data-game="logic" onclick="startGame('logic')">
+        <div class="game-card-glow"></div>
+        <div class="game-icon">🔢</div>
+        <div class="game-info">
+          <h3 class="game-name">Logic Blitz</h3>
+          <p class="game-desc">Speed-solve math and pattern questions before time runs out. Accuracy matters.</p>
+          <div class="game-meta">
+            <span class="game-skill skill-logic">Logic</span>
+            <span class="game-diff diff-medium">Intense</span>
+          </div>
+          <div class="game-best" id="best-logic">Best: —</div>
+        </div>
+        <button class="game-play-btn">Play</button>
+      </div>
+
+      <!-- Neural Strategy -->
+      <div class="game-card" data-game="strategy" onclick="startGame('strategy')">
+        <div class="game-card-glow"></div>
+        <div class="game-icon">🧠</div>
+        <div class="game-info">
+          <h3 class="game-name">Neural Strategy</h3>
+          <p class="game-desc">Outmaneuver the AI on a tactical grid. Think ahead, control territory, dominate.</p>
+          <div class="game-meta">
+            <span class="game-skill skill-strategy">Strategy</span>
+            <span class="game-diff diff-hard">Expert</span>
+          </div>
+          <div class="game-best" id="best-strategy">Best: —</div>
+        </div>
+        <button class="game-play-btn">Play</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Mini Leaderboard Preview -->
+  <section class="section">
+    <div class="section-header">
+      <h2 class="section-title">Top Players</h2>
+      <button class="btn-ghost btn-sm" onclick="showPage('leaderboard')">See Full Board →</button>
+    </div>
+    <div class="leaderboard-mini" id="lbMini">
+      <div class="lb-skeleton"></div>
+      <div class="lb-skeleton"></div>
+      <div class="lb-skeleton"></div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE: LEADERBOARD
+══════════════════════════════════════════════════════ -->
+<main class="page" id="page-leaderboard" style="display:none">
+  <section class="section">
+    <div class="section-header">
+      <h2 class="section-title">Leaderboard</h2>
+      <div class="lb-filters">
+        <button class="lb-filter active" data-filter="all" onclick="filterLB(this,'all')">All Games</button>
+        <button class="lb-filter" data-filter="reaction" onclick="filterLB(this,'reaction')">⚡ Reaction</button>
+        <button class="lb-filter" data-filter="memory" onclick="filterLB(this,'memory')">🧩 Memory</button>
+        <button class="lb-filter" data-filter="logic" onclick="filterLB(this,'logic')">🔢 Logic</button>
+        <button class="lb-filter" data-filter="strategy" onclick="filterLB(this,'strategy')">🧠 Strategy</button>
+      </div>
+    </div>
+    <div class="leaderboard-full" id="lbFull">
+      <div class="lb-skeleton"></div>
+      <div class="lb-skeleton"></div>
+      <div class="lb-skeleton"></div>
+      <div class="lb-skeleton"></div>
+      <div class="lb-skeleton"></div>
+    </div>
+  </section>
+</main>
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE: PROFILE
+══════════════════════════════════════════════════════ -->
+<main class="page" id="page-profile" style="display:none">
+  <section class="section">
+    <div class="profile-card">
+      <div class="profile-avatar" id="profileAvatar">?</div>
+      <div class="profile-info">
+        <h2 class="profile-username" id="profileUsername">—</h2>
+        <div class="profile-rank" id="profileRank">Bronze</div>
+        <div class="profile-streak" id="profileStreak">🔥 0 day streak</div>
+      </div>
+      <div class="profile-stats-grid">
+        <div class="pstat">
+          <div class="pstat-val" id="pstatXP">0</div>
+          <div class="pstat-label">Total XP</div>
+        </div>
+        <div class="pstat">
+          <div class="pstat-val" id="pstatLevel">1</div>
+          <div class="pstat-label">Level</div>
+        </div>
+        <div class="pstat">
+          <div class="pstat-val" id="pstatGames">0</div>
+          <div class="pstat-label">Games</div>
+        </div>
+        <div class="pstat">
+          <div class="pstat-val" id="pstatBest">0</div>
+          <div class="pstat-label">Best Score</div>
+        </div>
+      </div>
+      <div class="xp-bar-container">
+        <div class="xp-bar-label">
+          <span>Level <span id="pXpLevel">1</span></span>
+          <span><span id="pXpCurrent">0</span> / <span id="pXpNext">100</span> XP</span>
+        </div>
+        <div class="xp-bar">
+          <div class="xp-bar-fill" id="pXpFill" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Personal Bests -->
+    <div class="profile-section-title">Personal Bests</div>
+    <div class="personal-bests" id="personalBests">
+      <div class="pb-item"><span class="pb-game">⚡ Reaction Rush</span><span class="pb-score" id="pb-reaction">—</span></div>
+      <div class="pb-item"><span class="pb-game">🧩 Memory Matrix</span><span class="pb-score" id="pb-memory">—</span></div>
+      <div class="pb-item"><span class="pb-game">🔢 Logic Blitz</span><span class="pb-score" id="pb-logic">—</span></div>
+      <div class="pb-item"><span class="pb-game">🧠 Neural Strategy</span><span class="pb-score" id="pb-strategy">—</span></div>
+    </div>
+
+    <!-- Achievements -->
+    <div class="profile-section-title">Achievements <span class="achieve-count" id="achieveCount">0 / 12</span></div>
+    <div class="achievements-grid" id="achievementsGrid">
+      <!-- populated by JS -->
+    </div>
+
+    <!-- Recent Scores -->
+    <div class="profile-section-title">Recent Games</div>
+    <div class="recent-scores" id="recentScores">
+      <div class="lb-skeleton"></div>
+      <div class="lb-skeleton"></div>
+    </div>
+  </section>
+</main>
+
+<!-- ══════════════════════════════════════════════════════
+     GAME ARENA OVERLAY
+══════════════════════════════════════════════════════ -->
+<div class="game-arena" id="gameArena" style="display:none">
+  <div class="arena-topbar">
+    <button class="arena-back" onclick="exitGame()">← Exit</button>
+    <div class="arena-title" id="arenaTitle">Game</div>
+    <div class="arena-hud">
+      <div class="hud-item"><span class="hud-label">SCORE</span><span class="hud-val" id="hudScore">0</span></div>
+      <div class="hud-item"><span class="hud-label">LEVEL</span><span class="hud-val" id="hudLevel">1</span></div>
+      <div class="hud-item"><span class="hud-label">TIME</span><span class="hud-val" id="hudTime">—</span></div>
+    </div>
+  </div>
+
+  <!-- ── REACTION RUSH ─── -->
+  <div class="game-screen" id="screen-reaction" style="display:none">
+    <div class="reaction-instructions" id="reactionInstructions">
+      <h2>Reaction Rush</h2>
+      <p>When the target appears — <strong>tap/click it as fast as possible!</strong></p>
+      <p class="reaction-rounds">Rounds: <span id="reactionRoundDisp">5</span></p>
+      <button class="btn-primary btn-lg" onclick="reactionStart()">Start</button>
+    </div>
+    <div class="reaction-field" id="reactionField" style="display:none">
+      <div class="reaction-wait" id="reactionWait">Get ready…</div>
+      <div class="reaction-target" id="reactionTarget" style="display:none" onclick="reactionHit()"></div>
+      <div class="reaction-result" id="reactionResult"></div>
+    </div>
+  </div>
+
+  <!-- ── MEMORY MATRIX ─── -->
+  <div class="game-screen" id="screen-memory" style="display:none">
+    <div class="memory-status">
+      <span>Round <span id="memRound">1</span></span>
+      <span class="memory-phase" id="memPhase">Memorize</span>
+      <span>Grid <span id="memGridSize">3</span>×<span id="memGridSize2">3</span></span>
+    </div>
+    <div class="memory-grid" id="memoryGrid"></div>
+    <div class="memory-msg" id="memoryMsg">Watch the pattern...</div>
+    <button class="btn-primary" id="memSubmitBtn" style="display:none" onclick="memorySubmit()">Submit</button>
+  </div>
+
+  <!-- ── LOGIC BLITZ ─── -->
+  <div class="game-screen" id="screen-logic" style="display:none">
+    <div class="logic-header">
+      <div class="logic-lives" id="logicLives">❤️❤️❤️</div>
+      <div class="logic-timer-bar">
+        <div class="logic-timer-fill" id="logicTimerFill" style="width:100%"></div>
+      </div>
+    </div>
+    <div class="logic-question" id="logicQuestion">?</div>
+    <div class="logic-options" id="logicOptions"></div>
+    <div class="logic-streak">Streak: <span id="logicStreak">0</span> 🔥</div>
+  </div>
+
+  <!-- ── NEURAL STRATEGY ─── -->
+  <div class="game-screen" id="screen-strategy" style="display:none">
+    <div class="strategy-header">
+      <div class="strategy-score-row">
+        <div class="strat-score-item"><span class="strat-label">YOU</span><span class="strat-val" id="stratYou">0</span></div>
+        <div class="strat-turn" id="stratTurn">Your Turn</div>
+        <div class="strat-score-item"><span class="strat-label">AI</span><span class="strat-val" id="stratAI">0</span></div>
+      </div>
+    </div>
+    <div class="strategy-board" id="strategyBoard"></div>
+    <div class="strategy-hint" id="stratHint">Click a cell to place your piece</div>
+  </div>
+
+  <!-- ── GAME OVER ─── -->
+  <div class="game-over-overlay" id="gameOver" style="display:none">
+    <div class="game-over-card">
+      <div class="go-emoji" id="goEmoji">🏆</div>
+      <h2 class="go-title" id="goTitle">Game Over</h2>
+      <div class="go-score-row">
+        <div class="go-stat"><div class="go-val" id="goScore">0</div><div class="go-label">Score</div></div>
+        <div class="go-stat"><div class="go-val" id="goXP">+0 XP</div><div class="go-label">Earned</div></div>
+        <div class="go-stat"><div class="go-val" id="goLevel">1</div><div class="go-label">Level</div></div>
+      </div>
+      <div class="go-best" id="goBest"></div>
+      <div class="go-save-prompt" id="goSavePrompt" style="display:none">
+        <p>Sign up to save your score and climb the leaderboard!</p>
+        <button class="btn-primary btn-sm" onclick="exitGame();openAuth('signup')">Save Score — Create Account</button>
+        <button class="auth-link" onclick="exitGame()">Maybe later</button>
+      </div>
+      <div class="go-actions">
+        <button class="btn-primary btn-lg" onclick="replayGame()">Play Again</button>
+        <button class="btn-ghost btn-lg" onclick="exitGame()">Exit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     AUTH MODAL
+══════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="authModal" style="display:none" onclick="closeAuthOutside(event)">
+  <div class="modal-card auth-modal">
+    <button class="modal-close" onclick="closeAuth()">×</button>
+
+    <!-- Login Tab -->
+    <div class="auth-tab" id="authLogin">
+      <div class="auth-logo">⚡ MindRush Arena</div>
+      <h2 class="auth-title">Welcome Back</h2>
+      <div class="auth-err" id="loginErr" style="display:none"></div>
+      <input class="input-field" id="loginEmail" type="email" placeholder="Email" autocomplete="email">
+      <input class="input-field" id="loginPassword" type="password" placeholder="Password" autocomplete="current-password">
+      <button class="btn-primary w-full" id="loginBtn" onclick="doLogin()">Sign In</button>
+      <button class="auth-link" onclick="openAuth('reset')">Forgot password?</button>
+      <div class="auth-switch">No account? <button class="auth-link" onclick="openAuth('signup')">Sign Up</button></div>
+      <div class="auth-guest-row"><button class="auth-guest-btn" onclick="closeAuth()">Continue as Guest →</button></div>
+    </div>
+
+    <!-- Signup Tab -->
+    <div class="auth-tab" id="authSignup" style="display:none">
+      <div class="auth-logo">⚡ MindRush Arena</div>
+      <h2 class="auth-title">Create Account</h2>
+      <div class="auth-err" id="signupErr" style="display:none"></div>
+      <input class="input-field" id="signupUsername" type="text" placeholder="Username (shown on leaderboard)" maxlength="20">
+      <input class="input-field" id="signupEmail" type="email" placeholder="Email" autocomplete="email">
+      <input class="input-field" id="signupPassword" type="password" placeholder="Password (min 6 chars)" autocomplete="new-password">
+      <button class="btn-primary w-full" id="signupBtn" onclick="doSignup()">Create Account</button>
+      <div class="auth-switch">Have account? <button class="auth-link" onclick="openAuth('login')">Sign In</button></div>
+      <div class="auth-guest-row"><button class="auth-guest-btn" onclick="closeAuth()">Continue as Guest →</button></div>
+    </div>
+
+    <!-- Reset Password Tab -->
+    <div class="auth-tab" id="authReset" style="display:none">
+      <div class="auth-logo">⚡ MindRush Arena</div>
+      <h2 class="auth-title">Reset Password</h2>
+      <p class="auth-hint">Enter your email and we'll send a reset link.</p>
+      <div class="auth-err" id="resetErr" style="display:none"></div>
+      <div class="auth-ok" id="resetOk" style="display:none"></div>
+      <input class="input-field" id="resetEmail" type="email" placeholder="Email">
+      <button class="btn-primary w-full" onclick="doReset()">Send Reset Link</button>
+      <div class="auth-switch"><button class="auth-link" onclick="openAuth('login')">← Back to Sign In</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="app.js"></script>
+<script src="game.js"></script>
+<script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');</script>
+</body>
+</html>
