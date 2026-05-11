@@ -1,4 +1,4 @@
-const CACHE = 'mindrush-v1';
+const CACHE = 'mindrush-v2';
 const BASE = self.registration.scope;
 const SHELL = [
   BASE,
