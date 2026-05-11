@@ -2,7 +2,7 @@
 // MindRush Arena — app.js
 // ═══════════════════════════════════════════════════════
 
-const SB_URL = 'https://phphvmaulvygsjhjwygh.supabase.co';
+const SB_URL = 'https://phphvmaulvygsjhjwyzh.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGh2bWF1bHZ5Z3NqaGp3eXpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0MzA4OTYsImV4cCI6MjA5NDAwNjg5Nn0.rcT3uPqZYUuR5ODlxYdZ1EXCpcDmeGcNMibIQcamU28';
 
 const SB = supabase.createClient(SB_URL, SB_KEY);
@@ -590,18 +590,25 @@ async function doSignup() {
     return showAuthErr('signupErr', 'Username already taken.');
   }
 
-  const { data: signupData, error } = await SB.auth.signUp({ email, password: pw, options: { data: { username } } });
+  const { data: signupData, error } = await SB.auth.signUp({
+    email,
+    password: pw,
+    options: {
+      data: { username },
+      emailRedirectTo: window.location.href.split('?')[0].split('#')[0],
+    },
+  });
   btn.disabled = false;
   btn.textContent = 'Create Account';
 
   if (error) return showAuthErr('signupErr', error.message);
 
   if (!signupData.session) {
-    // Email confirmation is enabled in Supabase — session won't exist until confirmed
+    // Supabase still has email confirmation on — show instructions
     const el = document.getElementById('signupErr');
     if (el) {
-      el.textContent = '✉️ Almost there! Check your email and click the confirmation link, then come back to sign in.';
-      el.style.cssText = 'display:block;background:rgba(0,255,135,.08);border:1px solid rgba(0,255,135,.25);color:#00FF87;border-radius:8px;padding:10px;font-size:.78rem;text-align:center';
+      el.innerHTML = '✉️ Check your inbox for <strong>' + esc(email) + '</strong> and click the confirmation link, then sign in.';
+      el.style.cssText = 'display:block;background:rgba(0,255,135,.08);border:1px solid rgba(0,255,135,.25);color:#00FF87;border-radius:8px;padding:12px;font-size:.8rem;text-align:center;line-height:1.6';
     }
     return;
   }
