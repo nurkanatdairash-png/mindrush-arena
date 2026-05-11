@@ -1,0 +1,21 @@
+name: Keepalive — prevent Supabase free-tier pause
+
+on:
+  schedule:
+    - cron: '0 10 * * *'   # runs every day at 10:00 UTC
+  workflow_dispatch:         # allow manual trigger
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://phphvmaulvygsjhjwyzh.supabase.co/rest/v1/profiles?select=id&limit=1" \
+            -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBocGh2bWF1bHZ5Z3NqaGp3eXpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0MzA4OTYsImV4cCI6MjA5NDAwNjg5Nn0.rcT3uPqZYUuR5ODlxYdZ1EXCpcDmeGcNMibIQcamU28")
+          echo "Supabase responded: HTTP $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "WARNING: unexpected status $STATUS"
+            exit 1
+          fi
